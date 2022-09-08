@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oe.mapper.AdminMapper">
+ 
+    <select id ="getAdminList" resultType="com.oe.domain.MarketUserVO">
+        select * from marketuser where us_grade = 0
+    </select>
+    <select id="getUserInfo" resultType="com.oe.domain.MarketUserVO">
+       select * from marketuser where us_id = #{us_id}
+    </select>
+   <select id="readUserList" resultType="com.oe.domain.MarketUserVO">
+      select us_id, us_name, us_nickname, us_joindate, us_boardCnt, us_replyCnt, us_userPass from marketuser  where us_grade = 1 order by us_joindate desc
+   </select>
+   <select id="readBoardList" resultType="com.oe.domain.MarketBoardVO">
+      select bo_num, bo_title, bo_nickname, bo_regdate, bo_updatedate, bo_grade from marketboard order by bo_updatedate desc
+   </select>
+   <select id="getBoardList" resultType="com.oe.domain.MarketBoardVO">
+   select bo_id, bo_title, bo_nickname, bo_content, bo_category, bo_regdate, bo_updatedate, bo_grade from MARKETBOARD where bo_id = #{us_id} order by bo_updatedate desc
+   </select>
+   <select id="getReplyList" resultType="com.oe.domain.ReplyVO">
+   select re_num, re_id, bo_num, re_reply, re_name, re_regdate, re_updateDate from REPLY where re_id = #{us_id} order by re_updatedate desc
+   </select>
+<!-- 게시글 카운트  -->
+   <update id="updateBoardCnt" >            
+      update marketuser set us_boardCnt = us_boardCnt + #{amount} where us_id = #{bo_id}
+   </update>
+<!-- 댓글 카운트-->
+   <update id="updateReplyCnt" >            
+      update marketuser set us_replyCnt = us_replyCnt + #{amount} where us_id = #{re_id}
+   </update> 
+   <update id="updateUserPass1">
+        update marketuser set us_userpass = 1 where us_id = #{my_id}
+   </update>
+   <update id="updateUserPass2">
+        update marketuser set us_userpass = 2 where us_id = #{my_id}
+   </update>
+   <update id="boardBlind" >
+        update marketboard set bo_title = '블라인드 처리된 게시글입니다',bo_image1 = '/resources/assets/images/forbidden.png',  bo_grade = 0 where bo_num = #{bo_num}
+   </update>
+   <insert id="registerAdmin">
+    insert into marketuser(us_num, us_id, us_pass, us_name, us_nickname, us_address1, us_address2, us_phone, us_grade) 
+      values((select nvl(max(us_num), 0)+1 from marketuser),#{us_id},#{us_pass},#{us_name},#{us_nickname},'회사','사무실',#{us_phone}, 0)
+   </insert>
+   <insert id="registerMyPage">
+      insert into mypage(MY_ID, my_nickname, my_name)
+      values(#{us_id}, #{us_nickname},#{us_name} )
+   </insert>
+</mapper>

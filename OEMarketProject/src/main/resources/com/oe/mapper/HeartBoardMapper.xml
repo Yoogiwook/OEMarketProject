@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oe.mapper.HeartBoardMapper">
+	<resultMap type="com.oe.domain.MarketBoardVO" id="mvo">
+		<result column="BO_NUM" property="bo_num"/>
+		<result column="BO_ID" property="bo_id"/>
+		<result column="BO_TITLE" property="bo_title"/>
+		<result column="BO_NICKNAME" property="bo_nickname"/>
+		<result column="BO_PRICE" property="bo_price"/>
+		<result column="BO_CONTENT" property="bo_content"/>
+		<result column="BO_REGDATE" property="bo_regdate"/>
+		<result column="bo_image1" property="bo_image1"/>
+		<result column="BO_CATEGORY" property="bo_category"/>
+		<result column="BO_ADDRESS1" property="bo_address1"/>
+		<result column="BO_ADDRESS2" property="bo_address2"/>
+	</resultMap>
+	<resultMap type="com.oe.domain.HeartBoardVO" id="HeartMap">
+		<result column="HE_BO_NUM" property="he_bo_num"/>
+		<result column="HE_ID" property="he_id"/>
+		<result column="HE_NICKNAME" property="he_nickname"/>
+		<result column="HE_HEARTDATE" property="he_heartdate"/>
+		<collection property="mvo" resultMap="mvo"/>
+	</resultMap>
+	<select id="getListWithPaging" parameterType="map" resultMap="HeartMap">
+		<![CDATA[
+			SELECT	BO_NUM, BO_ID, BO_TITLE, BO_NICKNAME, BO_PRICE, BO_CONTENT, BO_REGDATE, bo_image1,
+					BO_CATEGORY, BO_ADDRESS1, BO_ADDRESS2, HE_BO_NUM, HE_ID, HE_NICKNAME, HE_HEARTDATE
+			FROM (
+				SELECT	ROW_NUMBER() OVER (ORDER BY HE_HEARTDATE DESC) RN,
+						BO_NUM, BO_ID, BO_TITLE, BO_NICKNAME, BO_PRICE, BO_CONTENT, BO_REGDATE, bo_image1,
+						BO_CATEGORY, BO_ADDRESS1, BO_ADDRESS2, HE_BO_NUM, HE_ID, HE_NICKNAME, HE_HEARTDATE
+				FROM MARKETBOARD, HEARTBOARD
+				WHERE HE_ID = #{my_id} AND BO_NUM = HE_BO_NUM
+				ORDER BY HE_HEARTDATE DESC
+			)
+			WHERE RN BETWEEN (#{cri.pageNum} - 1) * #{cri.amount} + 1 AND #{cri.pageNum} * #{cri.amount}
+		]]>
+	</select>
+	<delete id="deleteHeart" parameterType="map">
+		DELETE FROM HEARTBOARD
+		WHERE HE_BO_NUM = #{hvo.he_bo_num} AND HE_ID = #{hvo.he_id}
+	</delete>
+	<select id="getTotalCount" resultType="int">
+		SELECT COUNT(*)
+		FROM HEARTBOARD
+		WHERE HE_ID = #{my_id}
+	</select>
+</mapper>

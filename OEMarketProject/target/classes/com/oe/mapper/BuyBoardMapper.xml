@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oe.mapper.BuyBoardMapper">
+   <select id="getList" resultType="com.oe.domain.BuyBoardVO">
+      select * from buyboard where buy_id = #{my_id} order by buy_buydate desc
+   </select>
+
+</mapper>

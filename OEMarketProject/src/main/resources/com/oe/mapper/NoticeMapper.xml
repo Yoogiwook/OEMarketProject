@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oe.mapper.NoticeMapper">
+	<select id="getRecentNotice" resultType="com.oe.domain.NoticeVO">
+		SELECT *
+		FROM (
+			SELECT *
+			FROM NOTICE
+			WHERE NO_CATEGORY = 'NOTICE'
+			ORDER BY NO_DATE DESC
+		)
+		WHERE ROWNUM = 1
+	</select>
+	<select id="getListFaqTop5" resultType="com.oe.domain.NoticeVO">
+		SELECT *
+		FROM (
+			SELECT *
+			FROM NOTICE
+			WHERE NO_CATEGORY = 'FAQ'
+			ORDER BY NO_READCOUNT DESC
+		)
+		WHERE ROWNUM BETWEEN 1 AND 5
+	</select>
+	<select id="readNotice" resultType="com.oe.domain.NoticeVO">
+		SELECT *
+		FROM NOTICE
+		WHERE NO_NUM = #{no_num}
+	</select>
+	
+	<select id="getListNoticeWithPaging" resultType="com.oe.domain.NoticeVO">
+		<![CDATA[
+			SELECT	NO_NUM, NO_ID, NO_NICKNAME, NO_TITLE, NO_CONTENT,
+					NO_CATEGORY, NO_READCOUNT, NO_DATE
+			FROM (
+				SELECT	ROW_NUMBER() OVER (ORDER BY NO_DATE DESC) RN,
+						NO_NUM, NO_ID, NO_NICKNAME, NO_TITLE, NO_CONTENT,
+						NO_CATEGORY, NO_READCOUNT, NO_DATE
+				FROM NOTICE
+				WHERE NO_CATEGORY = 'NOTICE'
+				ORDER BY NO_DATE DESC
+			)
+			WHERE RN BETWEEN (#{pageNum} - 1) * #{amount} + 1 AND #{pageNum} * #{amount}
+		]]>
+	</select>
+	<select id="getListFaqWithPaging" resultType="com.oe.domain.NoticeVO">
+		<![CDATA[
+            select NO_NUM, NO_ID, NO_NICKNAME, NO_TITLE, NO_CONTENT,
+					NO_CATEGORY, NO_READCOUNT, NO_DATE
+            from 
+            (
+                select ROWNUM RN,NO_NUM, NO_ID, NO_NICKNAME, NO_TITLE, NO_CONTENT,
+					   NO_CATEGORY, NO_READCOUNT, NO_DATE
+                from (
+                        SELECT	ROWNUM RN,
+						NO_NUM, NO_ID, NO_NICKNAME, NO_TITLE, NO_CONTENT,
+						NO_CATEGORY, NO_READCOUNT, NO_DATE
+                        FROM NOTICE 
+                        WHERE NO_CATEGORY = 'FAQ'
+						AND (NO_TITLE LIKE'%' || #{cri.keyword} || '%' OR NO_CONTENT LIKE '%' || #{cri.keyword} || '%')
+          ]]>               
+                        <if test="cri.sort == '' || cri.sort == 'null'">ORDER BY NO_DATE DESC</if>
+                        <if test="cri.sort == 'readcount'">ORDER BY NO_READCOUNT DESC</if>
+         <![CDATA[               
+                     )
+                where no_category = 'FAQ' and ROWNUM <= #{cri.pageNum} * #{cri.amount}
+      
+
+              ) 
+            where rn >  (#{cri.pageNum}-1) * #{cri.amount}
+         ]]>
+	</select>
+	
+	<select id="getCountNotice" resultType="int">
+		SELECT COUNT(*)
+		FROM NOTICE
+		WHERE NO_CATEGORY = 'NOTICE'
+	</select>
+	<select id="getCountFAQ" resultType="int">
+			SELECT COUNT(*)
+			FROM NOTICE
+			WHERE NO_CATEGORY = 'FAQ'
+			<if test="sort == '' || sort == 'null'">ORDER BY NO_DATE DESC</if>
+            <if test="sort == 'readcount'">ORDER BY NO_READCOUNT DESC</if>
+	</select>
+	
+	<insert id="insertNotice">
+		INSERT INTO NOTICE(NO_NUM, NO_ID, NO_NICKNAME, NO_TITLE, NO_CONTENT, NO_CATEGORY)
+		VALUES((SELECT NVL(MAX(NO_NUM), 0) + 1 FROM NOTICE), #{no_id}, #{no_nickname}, #{no_title}, #{no_content}, 'NOTICE')
+	</insert>
+	<insert id="insertFAQ">
+		INSERT INTO NOTICE(NO_NUM, NO_ID, NO_NICKNAME, NO_TITLE, NO_CONTENT, NO_CATEGORY)
+		VALUES((SELECT NVL(MAX(NO_NUM), 0) + 1 FROM NOTICE), #{no_id}, #{no_nickname}, #{no_title}, #{no_content}, 'FAQ')
+	</insert>
+	
+	<update id="updateReadCount">
+		UPDATE NOTICE
+		SET NO_READCOUNT = NO_READCOUNT + 1
+		WHERE NO_NUM = #{no_num}
+	</update>
+	
+	<update id="update">
+		UPDATE NOTICE
+		SET	NO_TITLE = #{no_title},
+			NO_CONTENT = #{no_content}
+		WHERE NO_NUM = #{no_num}
+	</update>
+	
+	<delete id="delete">
+		DELETE FROM NOTICE
+		WHERE NO_NUM = #{no_num}
+	</delete>
+</mapper>

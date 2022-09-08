@@ -1,0 +1,598 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+
+<mapper namespace="com.oe.mapper.MarketBoardMapper">
+
+<!--============================================================================================================ -->
+   
+   <sql id="criteria">
+      <trim suffix=") and" prefix="(">
+         <foreach collection="typeArr" item="type" separator="or">
+            <if test="type=='T'.toString()">
+               bo_title like '%' || #{keyword} || '%'
+            </if>
+            <if test="type=='C'.toString()">
+               bo_content like '%' || #{keyword} || '%'
+            </if>
+            <if test="type=='W'.toString()">
+               bo_nickname like '%' || #{keyword} || '%'
+            </if>
+            <if test="type=='G'.toString()">
+               bo_category like '%' || #{keyword} || '%'
+            </if>
+         </foreach>
+      </trim>
+   </sql>
+
+<!--============================================================================================================ -->
+
+    <select id="getListBoard" resultType="com.oe.domain.MarketBoardVO">
+        <!-- select * from marketboard order by BO_HEARTCOUNT desc -->
+      
+      
+      <![CDATA[
+         select bo_num, bo_count, bo_heartcount, bo_price, bo_id, bo_title,bo_nickname,bo_image1,bo_image2,bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from ( select /*+ index_desc(tbl_board pk_board) */
+            rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1,bo_image2,bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from (select rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1,bo_image2,bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from marketboard order by BO_HEARTCOUNT desc)
+            where 
+       ]]>
+
+      <include refid="criteria"></include>
+    
+       <![CDATA[
+         ROWNUM <= #{pageNum} * #{amount} )
+         where 
+         rn > (#{pageNum}-1) * #{amount}
+       ]]>
+    </select>
+ 
+    <select id="getList_regdate" resultType="com.oe.domain.MarketBoardVO">
+        <!-- select * from marketboard order by bo_regdate desc -->
+      
+       <![CDATA[
+         select bo_num, bo_count, bo_heartcount, bo_price, bo_id, bo_title,bo_nickname,bo_image1,bo_image2,bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from ( select /*+ index_desc(tbl_board pk_board) */
+            rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1,bo_image2,bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from (select rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1,bo_image2,bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from marketboard order by bo_regdate desc)
+            where 
+       ]]>
+
+      <include refid="criteria"></include>
+    
+       <![CDATA[
+         ROWNUM <= #{pageNum} * #{amount} )
+         where 
+         rn > (#{pageNum}-1) * #{amount}
+       ]]>
+    </select>
+
+    <select id="getList_lowPrice" resultType="com.oe.domain.MarketBoardVO">
+        <!-- select * from marketboard order by bo_price  -->
+             
+         <![CDATA[     
+         select bo_num, bo_count, bo_heartcount, bo_price, bo_id, bo_title,bo_nickname,bo_image1,bo_image2,bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from ( select /*+ index_desc(tbl_board pk_board) */
+            rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1,bo_image2,bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from (select rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1,bo_image2,bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from marketboard order by bo_price)
+            where 
+       ]]>
+
+      <include refid="criteria"></include>
+    
+       <![CDATA[
+         ROWNUM <= #{pageNum} * #{amount} )
+         where 
+         rn > (#{pageNum}-1) * #{amount}
+       ]]>
+    </select>
+
+    <select id="getList_highPrice" resultType="com.oe.domain.MarketBoardVO">
+        <!-- select * from marketboard order by bo_price desc --> 
+         <![CDATA[
+         select bo_num, bo_count, bo_heartcount, bo_price, bo_id, bo_title,bo_nickname,bo_image1,bo_image2,bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from ( select /*+ index_desc(tbl_board pk_board) */
+            rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1,bo_image2,bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from (select rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1,bo_image2,bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from marketboard order by bo_price desc)
+            where 
+       ]]>
+
+      <include refid="criteria"></include>
+    
+       <![CDATA[
+         ROWNUM <= #{pageNum} * #{amount} )
+         where 
+         rn > (#{pageNum}-1) * #{amount}
+       ]]>
+    </select>
+
+<!-- List부분 끝======================================================================================================================================== -->
+   
+     <insert id="crawlinginsert">
+        insert into marketboard(bo_num, bo_id, bo_title, bo_nickname, bo_price, bo_content, bo_image1 ,bo_count, bo_heartcount, bo_category, bo_address1,bo_address2,bo_regdate)
+        values((select nvl(max(bo_num), 0)+1 from marketboard), #{bo_id, jdbcType=VARCHAR}, #{bo_title, jdbcType=VARCHAR}, #{bo_nickname, jdbcType=VARCHAR}, #{bo_price, jdbcType=VARCHAR}, #{bo_content, jdbcType=VARCHAR}, #{bo_image1, jdbcType=VARCHAR}, #{bo_count, jdbcType=VARCHAR}, #{bo_heartcount, jdbcType=VARCHAR}, #{bo_category, jdbcType=VARCHAR}, #{bo_address1, jdbcType=VARCHAR}, #{bo_address2, jdbcType=VARCHAR},#{bo_regdate, jdbcType=VARCHAR})
+    </insert>
+
+     <insert id="insert">
+        insert into marketboard(bo_num, bo_id, bo_title, bo_nickname, bo_price, bo_content, bo_category, bo_address1,bo_address2, bo_image1, bo_image2, bo_image3)
+        values((select nvl(max(bo_num), 0)+1 from marketboard), #{bo_id, jdbcType=VARCHAR}, #{bo_title, jdbcType=VARCHAR}, #{bo_nickname, jdbcType=VARCHAR}, #{bo_price, jdbcType=VARCHAR}, #{bo_content, jdbcType=VARCHAR}, #{bo_category, jdbcType=VARCHAR}, #{bo_address1, jdbcType=VARCHAR}, #{bo_address2, jdbcType=VARCHAR},#{bo_image1, jdbcType=VARCHAR}, #{bo_image2, jdbcType=VARCHAR},#{bo_image3, jdbcType=VARCHAR})
+    </insert>
+
+   <delete id="crawlingRemove">
+        delete marketboard where bo_category is null
+     </delete>
+   
+   <select id="getBoardDetail" resultType="com.oe.domain.MarketBoardVO">
+      select * from marketboard where bo_num = #{bo_num, jdbcType=VARCHAR}
+   </select>
+   
+   <!-- 상품 수정 -->
+   <update id="updateBoard">
+      update marketboard set bo_title=#{bo_title},
+      bo_price=#{bo_price}, bo_content=#{bo_content}, bo_category=#{bo_category},
+      bo_image1=#{bo_image1}, bo_image2=#{bo_image2}, bo_image3=#{bo_image3}, bo_updatedate = sysdate
+      where
+      bo_num=#{bo_num}
+      <!-- updatedate=sysdate -->
+   </update>
+   <!-- //상품 수정 -->
+   
+   <!-- 조회수 -->
+   <update id="updateViewCnt">
+      update marketboard set bo_count = bo_count + 1 
+      where bo_num = #{bo_num}
+   </update>
+   
+   <!-- 하트찜 유저 가져오기 -->
+   <select id="getHeartId" resultType="String">
+         select he_id 
+         FROM HEARTBOARD 
+         where he_bo_num = #{bo_num}
+   </select>
+   
+   <!-- 하트찜 제거 -->
+   <delete id="deleteHeart">
+         delete HEARTBOARD 
+         where he_bo_num = #{bo_num} and he_id = #{bo_id}
+   </delete>
+   
+   <!-- 하트수 가져오기 -->   
+   <select id="getHeartCount" resultType="Long">
+         SELECT COUNT(*)
+      FROM HEARTBOARD
+      WHERE HE_BO_NUM = #{bo_num}
+   </select>
+   
+   <!-- 하트 수 올리기 -->
+   <insert id="upHeartCount">
+         insert into HEARTBOARD(he_bo_num, he_id, he_nickname) values(#{bo_num}, #{bo_id}, #{bo_nickname})
+   </insert>
+      
+   <!-- 마켓보드 heartCount 내리기 -->
+   <update id="minusHeartCnt">
+      update marketboard set bo_heartcount = bo_heartcount - 1 
+      where bo_num = #{bo_num}
+   </update>
+   
+   <!-- 마켓보드 heartCount 올리기 -->
+   <update id="plusHeartCnt">
+      update marketboard set bo_heartcount = bo_heartcount + 1 
+      where bo_num = #{bo_num}
+   </update>
+   
+   <!-- 상품 삭제 -->
+   <delete id="removeBoard">
+      delete marketboard where bo_num=#{bo_num}
+   </delete>
+   <!-- //상품 삭제 -->
+   
+   <!-- 판매완료 -->
+   <update id="sellOk">
+   		update marketboard set bo_ok = 1
+   		where bo_num = #{bo_num}
+   </update>
+   
+   <!-- 페이징처리&검색============================================================================================================ -->
+   
+
+   <select id="getListWithPagging"
+      resultType="com.oe.domain.MarketBoardVO">
+         <![CDATA[
+         select bo_num, bo_count, bo_heartcount, bo_price, bo_id, bo_title,bo_nickname,bo_image1,bo_image2,bo_image3,bo_content,bo_category,bo_address1,bo_address2
+         from (
+            select /*+ index_desc(tbl_board pk_board) */
+            rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1,bo_image2,bo_image3,bo_content,bo_category,bo_address1,bo_address2
+            from marketboard
+            where 
+       ]]>
+
+      <include refid="criteria"></include>
+    
+       <![CDATA[
+         ROWNUM <= #{pageNum} * #{amount} )
+         where 
+         rn > (#{pageNum}-1) * #{amount}
+       ]]>
+   </select>
+
+
+   <!-- ========================================================= -->
+
+   <select id="getTotalCount" resultType="int">
+      select count(*) from
+      marketboard where
+
+      <include refid="criteria"></include>
+
+      bo_num > 0
+   </select>
+
+
+   <!-- 검색조건 -->
+   <select id="searchTest" resultType="com.oe.domain.MarketBoardVO">
+      
+      <![CDATA[
+      select * from marketboard
+      where
+      ]]>
+
+      <trim prefix="(" suffix=") and">
+         <foreach collection="map" index="key" item="val"
+            separator="or">
+            <if test="key == 'T'.toString()">
+               bo_title like #{val}
+            </if>
+            <if test="key == 'C'.toString()">
+               bo_content like #{val}
+            </if>
+            <if test="key == 'W'.toString()">
+               bo_nickname like #{val}
+            </if>
+            <if test="key == 'G'.toString()">
+               bo_category like #{val}
+            </if>
+         </foreach>
+      </trim>
+      
+      <![CDATA[
+      rownum < 10
+      ]]>
+
+   </select>
+
+
+   <!-- 페이징처리&검색============================================================================================================ -->
+   
+   <!-- 0815 카테고리 정렬 ============================================================================================================ -->
+    
+    <select id="getList_book" resultType="com.oe.domain.MarketBoardVO">
+        <!-- select * from marketboard order by bo_regdate desc -->
+      
+      <![CDATA[
+         select bo_num, bo_count, bo_heartcount, bo_price, bo_id, bo_title,bo_nickname,bo_image1, bo_image2, bo_image3, bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from ( select /*+ index_desc(tbl_board pk_board) */
+            rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3, bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from (select rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3, bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from marketboard order by bo_regdate desc)
+            where bo_category='도서/티켓/문구' and
+       ]]>
+
+      <include refid="criteria"></include>
+    
+       <![CDATA[
+         ROWNUM <= #{pageNum} * #{amount} )
+         where 
+         rn > (#{pageNum}-1) * #{amount}
+       ]]>
+    </select>
+    
+    <select id="getList_music" resultType="com.oe.domain.MarketBoardVO">
+        <!-- select * from marketboard order by bo_regdate desc -->
+      
+      <![CDATA[
+         select bo_num, bo_count, bo_heartcount, bo_price, bo_id, bo_title,bo_nickname,bo_image1, bo_image2, bo_image3, bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from ( select /*+ index_desc(tbl_board pk_board) */
+            rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3, bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from (select rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from marketboard order by bo_regdate desc)
+            where bo_category='음반/악기' and
+       ]]>
+
+      <include refid="criteria"></include>
+    
+       <![CDATA[
+         ROWNUM <= #{pageNum} * #{amount} )
+         where 
+         rn > (#{pageNum}-1) * #{amount}
+       ]]>
+    </select>
+    
+    <select id="getList_art" resultType="com.oe.domain.MarketBoardVO">
+        <!-- select * from marketboard order by bo_regdate desc -->
+      
+      <![CDATA[
+         select bo_num, bo_count,  bo_heartcount, bo_price, bo_id, bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from ( select /*+ index_desc(tbl_board pk_board) */
+            rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from (select rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from marketboard order by bo_regdate desc)
+            where bo_category='예술/수집품' and
+       ]]>
+
+      <include refid="criteria"></include>
+    
+       <![CDATA[
+         ROWNUM <= #{pageNum} * #{amount} )
+         where 
+         rn > (#{pageNum}-1) * #{amount}
+       ]]>
+    </select>
+    
+    <select id="getList_woman" resultType="com.oe.domain.MarketBoardVO">
+        <!-- select * from marketboard order by bo_regdate desc -->
+      
+      <![CDATA[
+         select bo_num, bo_count, bo_heartcount, bo_price, bo_id, bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from ( select /*+ index_desc(tbl_board pk_board) */
+            rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from (select rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from marketboard order by bo_regdate desc)
+            where bo_category='여성의류' and
+       ]]>
+
+      <include refid="criteria"></include>
+    
+       <![CDATA[
+         ROWNUM <= #{pageNum} * #{amount} )
+         where 
+         rn > (#{pageNum}-1) * #{amount}
+       ]]>
+    </select>
+    
+    <select id="getList_man" resultType="com.oe.domain.MarketBoardVO">
+        <!-- select * from marketboard order by bo_regdate desc -->
+      
+      <![CDATA[
+         select bo_num, bo_count,  bo_heartcount, bo_price, bo_id, bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from ( select /*+ index_desc(tbl_board pk_board) */
+            rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from (select rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from marketboard order by bo_regdate desc)
+            where bo_category='남성의류' and
+       ]]>
+
+      <include refid="criteria"></include>
+    
+       <![CDATA[
+         ROWNUM <= #{pageNum} * #{amount} )
+         where 
+         rn > (#{pageNum}-1) * #{amount}
+       ]]>
+    </select>
+    
+    <select id="getList_shoes" resultType="com.oe.domain.MarketBoardVO">
+        <!-- select * from marketboard order by bo_regdate desc -->
+      
+      <![CDATA[
+         select bo_num, bo_count,  bo_heartcount, bo_price, bo_id, bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from ( select /*+ index_desc(tbl_board pk_board) */
+            rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from (select rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from marketboard order by bo_regdate desc)
+            where bo_category='신발' and
+       ]]>
+
+      <include refid="criteria"></include>
+    
+       <![CDATA[
+         ROWNUM <= #{pageNum} * #{amount} )
+         where 
+         rn > (#{pageNum}-1) * #{amount}
+       ]]>
+    </select>
+    
+    <select id="getList_bag" resultType="com.oe.domain.MarketBoardVO">
+        <!-- select * from marketboard order by bo_regdate desc -->
+      
+      <![CDATA[
+         select bo_num, bo_count, bo_heartcount, bo_price, bo_id, bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from ( select /*+ index_desc(tbl_board pk_board) */
+            rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from (select rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from marketboard order by bo_regdate desc)
+            where bo_category='가방' and
+       ]]>
+
+      <include refid="criteria"></include>
+    
+       <![CDATA[
+         ROWNUM <= #{pageNum} * #{amount} )
+         where 
+         rn > (#{pageNum}-1) * #{amount}
+       ]]>
+    </select>
+    
+    <select id="getList_watch" resultType="com.oe.domain.MarketBoardVO">
+        <!-- select * from marketboard order by bo_regdate desc -->
+      
+      <![CDATA[
+         select bo_num, bo_count, bo_heartcount, bo_price, bo_id, bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from ( select /*+ index_desc(tbl_board pk_board) */
+            rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from (select rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from marketboard order by bo_regdate desc)
+            where bo_category='시계' and
+       ]]>
+
+      <include refid="criteria"></include>
+    
+       <![CDATA[
+         ROWNUM <= #{pageNum} * #{amount} )
+         where 
+         rn > (#{pageNum}-1) * #{amount}
+       ]]>
+    </select>
+    
+    <select id="getList_jewelry" resultType="com.oe.domain.MarketBoardVO">
+        <!-- select * from marketboard order by bo_regdate desc -->
+      
+      <![CDATA[
+         select bo_num, bo_count,  bo_heartcount, bo_price, bo_id, bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from ( select /*+ index_desc(tbl_board pk_board) */
+            rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from (select rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from marketboard order by bo_regdate desc)
+            where bo_category='쥬얼리' and
+       ]]>
+
+      <include refid="criteria"></include>
+    
+       <![CDATA[
+         ROWNUM <= #{pageNum} * #{amount} )
+         where 
+         rn > (#{pageNum}-1) * #{amount}
+       ]]>
+    </select>
+    
+    <select id="getList_funiture" resultType="com.oe.domain.MarketBoardVO">
+        <!-- select * from marketboard order by bo_regdate desc -->
+      
+      <![CDATA[
+         select bo_num, bo_count,  bo_heartcount, bo_price, bo_id, bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from ( select /*+ index_desc(tbl_board pk_board) */
+            rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from (select rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from marketboard order by bo_regdate desc)
+            where bo_category='가구/인테리어' and
+       ]]>
+
+      <include refid="criteria"></include>
+    
+       <![CDATA[
+         ROWNUM <= #{pageNum} * #{amount} )
+         where 
+         rn > (#{pageNum}-1) * #{amount}
+       ]]>
+    </select>
+    
+    <select id="getList_car" resultType="com.oe.domain.MarketBoardVO">
+        <!-- select * from marketboard order by bo_regdate desc -->
+      
+      <![CDATA[
+         select bo_num, bo_count,  bo_heartcount, bo_price, bo_id, bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from ( select /*+ index_desc(tbl_board pk_board) */
+            rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from (select rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from marketboard order by bo_regdate desc)
+            where bo_category='차량/오토바이' and
+       ]]>
+
+      <include refid="criteria"></include>
+    
+       <![CDATA[
+         ROWNUM <= #{pageNum} * #{amount} )
+         where 
+         rn > (#{pageNum}-1) * #{amount}
+       ]]>
+    </select>
+    
+    <select id="getList_kidult" resultType="com.oe.domain.MarketBoardVO">
+        <!-- select * from marketboard order by bo_regdate desc -->
+      
+      <![CDATA[
+         select bo_num, bo_count,  bo_heartcount, bo_price, bo_id, bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from ( select /*+ index_desc(tbl_board pk_board) */
+            rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from (select rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from marketboard order by bo_regdate desc)
+            where bo_category='키덜트' and
+       ]]>
+
+      <include refid="criteria"></include>
+    
+       <![CDATA[
+         ROWNUM <= #{pageNum} * #{amount} )
+         where 
+         rn > (#{pageNum}-1) * #{amount}
+       ]]>
+    </select>
+    
+    <select id="getList_food" resultType="com.oe.domain.MarketBoardVO">
+        <!-- select * from marketboard order by bo_regdate desc -->
+      
+      <![CDATA[
+         select bo_num, bo_count,  bo_heartcount, bo_price, bo_id, bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from ( select /*+ index_desc(tbl_board pk_board) */
+            rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from (select rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from marketboard order by bo_regdate desc)
+            where bo_category='생활용품' and
+       ]]>
+
+      <include refid="criteria"></include>
+    
+       <![CDATA[
+         ROWNUM <= #{pageNum} * #{amount} )
+         where 
+         rn > (#{pageNum}-1) * #{amount}
+       ]]>
+    </select>
+    
+    <select id="getList_pet" resultType="com.oe.domain.MarketBoardVO">
+        <!-- select * from marketboard order by bo_regdate desc -->
+      
+      <![CDATA[
+         select bo_num, bo_count,  bo_heartcount, bo_price, bo_id, bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from ( select /*+ index_desc(tbl_board pk_board) */
+            rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from (select rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from marketboard order by bo_regdate desc)
+            where bo_category='반려동물용품' and
+       ]]>
+
+      <include refid="criteria"></include>
+    
+       <![CDATA[
+         ROWNUM <= #{pageNum} * #{amount} )
+         where 
+         rn > (#{pageNum}-1) * #{amount}
+       ]]>
+    </select>
+    
+    <select id="getList_etc" resultType="com.oe.domain.MarketBoardVO">
+        <!-- select * from marketboard order by bo_regdate desc -->
+      
+      <![CDATA[
+         select bo_num, bo_count,  bo_heartcount, bo_price, bo_id, bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from ( select /*+ index_desc(tbl_board pk_board) */
+            rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from (select rownum rn, bo_num, bo_count, bo_heartcount,bo_price, bo_id,bo_title,bo_nickname,bo_image1, bo_image2, bo_image3,bo_content,bo_category,bo_address1,bo_address2,bo_regdate
+            from marketboard order by bo_regdate desc)
+            where bo_category='기타' and
+       ]]>
+
+      <include refid="criteria"></include>
+    
+       <![CDATA[
+         ROWNUM <= #{pageNum} * #{amount} )
+         where 
+         rn > (#{pageNum}-1) * #{amount}
+       ]]>
+    </select>
+   
+   
+   
+        
+        
+   
+   
+   
+   
+</mapper>

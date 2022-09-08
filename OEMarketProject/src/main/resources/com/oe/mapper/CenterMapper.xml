@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oe.mapper.CenterMapper">
+ 
+ 
+<!-- =================================================== 건의사항 ===========================================================-->
+
+ <select id="getSuggestListWithPaging" resultType="com.oe.domain.CenterVO">
+      
+      <![CDATA[
+            select ce_num,ce_id,ce_date,ce_title 
+            from 
+            (
+                select rownum rn,ce_num,ce_id,ce_date,ce_title, ce_category
+                from (
+                        select rownum rn,ce_num,ce_id,ce_date,ce_title, ce_category
+                        from center 
+                        order by ce_num DESC
+                     )
+                where ce_category = 'SUGGESTION' and ROWNUM <= #{cri.pageNum} * #{cri.amount}
+       ]]>
+          	<if test="cri.category == '' || cri.category == 'null'"></if>
+          	<if test="cri.category == 'onlyme'">and ce_id = #{us_id}</if>
+      <![CDATA[
+              ) 
+            where rn >  (#{cri.pageNum}-1) * #{cri.amount}
+       ]]>
+         
+         
+   </select>
+	
+	<select id="getSuggestTotal" resultType="int">
+		select count(*) from center where ce_category = 'SUGGESTION'
+          	
+          	<if test="category == ''"></if>
+          	<if test="category == 'onlyme'">and ce_id = #{us_id}</if>
+          	
+	</select>
+	
+	<select id="getSuggest" resultType="com.oe.domain.CenterVO">
+		select * from center where ce_num = #{ce_num} and ce_category = 'SUGGESTION' 
+	</select>
+	
+	<delete id="suggestAdminDelete">
+		delete center where ce_num = #{ce_num}
+	</delete>
+	
+	<insert id="SuggestInstert">
+		insert into CENTER (ce_num,ce_id,ce_nickname,ce_title,ce_content,ce_category,
+			ce_filename,ce_filepath,ce_filesize)
+		values((select nvl(max(ce_num), 0)+1 from CENTER),#{ce_id},#{ce_nickname},#{ce_title},#{ce_content},#{ce_category},
+			#{ce_filename, jdbcType=VARCHAR},#{ce_filepath, jdbcType=VARCHAR},#{ce_filesize, jdbcType=VARCHAR})
+	</insert>
+	
+<!-- =================================================== 1:1 문의 ===========================================================-->	
+ 	<select id="getQnAListWithPaging" resultType="com.oe.domain.CenterVO">
+      
+      <![CDATA[
+            select ce_num,ce_id,ce_nickname,ce_email,ce_title,ce_content,ce_category,ce_status,
+				ce_filename,ce_filepath,ce_filesize,ce_date 
+            from 
+            (
+                select rownum rn,ce_num,ce_id,ce_nickname,ce_email,ce_title,ce_content,ce_category,ce_status,
+				ce_filename,ce_filepath,ce_filesize,ce_date
+                from (
+                        select rownum rn,ce_num,ce_id,ce_nickname,ce_email,ce_title,ce_content,ce_category,ce_status,
+				ce_filename,ce_filepath,ce_filesize,ce_date
+                        from center 
+                        order by ce_num DESC
+                     )
+                where ce_id = #{us_id} and ROWNUM <= #{cri.pageNum} * #{cri.amount} and ce_category = 'QNA'
+       ]]>
+      <![CDATA[
+              ) 
+            where rn >  (#{cri.pageNum}-1) * #{cri.amount}
+       ]]>
+	   </select>
+ 	
+ 	<select id="getQnAAdminListWithPaging" resultType="com.oe.domain.CenterVO">
+      
+      <![CDATA[
+            select ce_num,ce_id,ce_nickname,ce_email,ce_title,ce_content,ce_category,ce_status,
+				ce_filename,ce_filepath,ce_filesize,ce_date 
+            from 
+            (
+                select rownum rn,ce_num,ce_id,ce_nickname,ce_email,ce_title,ce_content,ce_category,ce_status,
+				ce_filename,ce_filepath,ce_filesize,ce_date
+                from (
+                        select rownum rn,ce_num,ce_id,ce_nickname,ce_email,ce_title,ce_content,ce_category,ce_status,
+				ce_filename,ce_filepath,ce_filesize,ce_date
+                        from center 
+                        order by ce_num DESC
+                     )
+                where ROWNUM <= #{pageNum} * #{amount} and ce_category = 'QNA'
+       ]]>
+      <![CDATA[
+              ) 
+            where rn >  (#{pageNum}-1) * #{amount}
+       ]]>
+	   </select>
+		
+		<select id="getQnATotal" resultType="int">
+			select count(*) from center where ce_category = 'QNA'
+		</select>
+		
+		<insert id="QnAInstert">
+			insert into CENTER (ce_num,ce_id,ce_nickname,ce_email,ce_title,ce_content,ce_category,ce_status,
+				ce_filename,ce_filepath,ce_filesize)
+			values((select nvl(max(ce_num), 0)+1 from CENTER),#{ce_id},#{ce_nickname},#{ce_email},#{ce_title},#{ce_content},#{ce_category},#{ce_status},
+				#{ce_filename, jdbcType=VARCHAR},#{ce_filepath, jdbcType=VARCHAR},#{ce_filesize, jdbcType=VARCHAR})
+		</insert>
+		
+		<select id="getQnA" resultType="com.oe.domain.CenterVO">
+			select * from center where ce_num = #{ce_num}
+		</select>
+		
+		<update id="updateQnAStatus">
+			update center set ce_status = '답변 완료' where ce_num = #{ce_num}
+		</update>
+	
+	<!-- 파일번호 = 글번호  -->
+		<update id="updateFileNum">
+        	update from center set ce_filenum = #{ce_num} where ce_num = #{ce_num}
+        </update> 
+	
+	
+</mapper>

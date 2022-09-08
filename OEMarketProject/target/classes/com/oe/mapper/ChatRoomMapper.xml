@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oe.mapper.ChatRoomMapper">
+	<insert id="insert">
+		insert into chatRoom(cr_roomNumber, cr_roomName, cr_seller, cr_buyer, cr_seller_id, cr_buyer_id)
+		values(
+			(select nvl(max(cr_roomNumber), 0)+1 from chatRoom), #{cr_seller},#{cr_seller},#{cr_buyer},#{cr_seller_id},#{cr_buyer_id}
+		)
+	</insert>
+
+	<select id="Chk_Room" resultType="int">
+		select count(*) cr_roomName from chatRoom where (CR_SELLER = #{my_nickname} or CR_BUYER=#{my_nickname}) 
+		and (cr_roomname= #{my_nickname} or cr_roomname= #{cr_seller})
+	</select>
+
+	<select id="RoomList" resultType="com.oe.domain.ChatRoomVO">
+		select * from chatroom
+		where CR_SELLER = #{my_nickname} or CR_BUYER=#{my_nickname}
+	</select>
+	
+	<select id="getNickname" resultType="string">
+		select my_nickname from mypage where my_id = #{us_id} 
+	</select>
+	
+</mapper>

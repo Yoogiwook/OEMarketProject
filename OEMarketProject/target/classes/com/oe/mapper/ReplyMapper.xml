@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.oe.mapper.ReplyMapper">
+
+ 	<insert id="insert">
+ 		insert into reply(re_num, bo_num, re_reply, re_name, re_profile,re_id)
+ 		values((select nvl(max(re_num), 0)+1 from reply), #{bo_num}, #{re_reply}, #{re_name}, #{re_profile},#{re_id})
+ 	</insert>
+ 	
+ 	<select id="read" resultType="com.oe.domain.ReplyVO">
+ 		select * from reply where re_num = #{re_num}
+ 	</select>
+ 	
+ 	<delete id="delete">
+ 		delete from reply where re_num = #{re_num}
+ 	</delete>
+    
+    <update id="update">
+    	update reply set
+    	re_reply = #{re_reply}, re_updateDate = sysdate where re_num = #{re_num}
+    </update>
+    
+    <select id="getListWithPaging" resultType="com.oe.domain.ReplyVO">
+       <![CDATA[
+       select re_num, bo_num, re_reply, re_name, re_profile, re_regdate, re_updateDate, re_id
+       from (
+          select /*+ index(reply idx_reply)*/
+          rownum rn, re_num, bo_num, re_reply, re_name, re_profile, re_regdate, re_updateDate, re_id
+          from (select rownum rn, re_num, bo_num, re_reply, re_name, re_profile, re_regdate, re_updateDate, re_id 
+          from reply order by re_num desc)
+          where bo_num = #{bo_num}
+          and re_num > 0 
+          and rownum <= #{cri.pageNum}*#{cri.amount}
+       ) 
+       where rn > (#{cri.pageNum}-1)*#{cri.amount}
+       order by re_num desc
+       ]]>
+    </select>
+    
+    <select id="getCountByBo" resultType="int">
+		select count(re_num) from reply where bo_num = #{bo_num}
+	</select>
+  
+</mapper>

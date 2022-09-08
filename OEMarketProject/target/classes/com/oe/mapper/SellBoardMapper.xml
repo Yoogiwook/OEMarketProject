@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oe.mapper.SellBoardMapper">
+
+   <sql id="Filter">
+      <trim prefix=" and (" suffix=")">
+            <if test="filter.equals('') || filter =='null'">
+               bo_ok = 0 or bo_ok = 1
+            </if>
+            <if test="filter.equals('판매중')">
+               bo_ok = 0
+            </if>
+            <if test="filter.equals('판매완료')">
+               bo_ok = 1
+            </if>
+       </trim>
+   </sql>
+   
+   <select id="getListWithPaging" resultType="com.oe.domain.MarketBoardVO">
+      
+      
+      <![CDATA[
+         select bo_num, bo_id, bo_title, bo_nickname, bo_price, bo_content,bo_regdate,bo_image1,bo_ok
+            from (
+               select rownum rn, bo_num, bo_id,bo_title,bo_nickname, bo_price, bo_content,bo_regdate,bo_image1,bo_ok
+               from (
+                       select rownum rn, bo_num, bo_id,bo_title,bo_nickname, bo_price, bo_content,bo_regdate,bo_image1,bo_ok
+                       from marketboard
+                       order by bo_regdate desc
+                       )
+               where bo_id = #{my_id} and ROWNUM <= #{cri.pageNum} * #{cri.amount}
+       ]]>
+         		 <include refid="Filter"></include>
+     <![CDATA[
+              
+            )
+            where rn >  (#{cri.pageNum}-1) * #{cri.amount}
+       ]]>
+      
+      
+      
+      <!-- <![CDATA[
+         select bo_num, bo_id, bo_title, bo_nickname, bo_price, bo_content,bo_regdate,bo_image1
+            from (
+               select 
+               rownum rn, bo_num, bo_id,bo_title,bo_nickname, bo_price, bo_content,bo_regdate,bo_image1
+               from marketboard
+               where bo_id = #{my_id}
+       ]]>
+          <include refid="Filter"></include>
+          and
+      <![CDATA[
+               ROWNUM <= #{cri.pageNum} * #{cri.amount}
+            )
+            where
+             rn > (#{cri.pageNum}-1) * #{cri.amount}
+       ]]>
+         
+         order by bo_regdate desc -->
+   </select>
+   
+   
+   <select id="getTotal" resultType="int">
+      select count(*) from marketboard where bo_id = #{my_id}
+      <include refid="Filter"></include>
+   </select>
+</mapper>

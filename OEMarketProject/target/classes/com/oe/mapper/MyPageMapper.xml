@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oe.mapper.MyPageMapper">
+   <select id="readMyPage" resultType="com.oe.domain.MyPageVO">
+      SELECT *
+      FROM MYPAGE
+      WHERE MY_ID = #{my_id}
+   </select>
+   <update id="updateMyPage">
+      UPDATE MYPAGE
+      SET MY_IMAGE = #{my_image},
+         MY_NICKNAME = #{my_nickname},
+         MY_INTRO = #{my_intro, jdbcType=VARCHAR}
+      WHERE MY_ID = #{my_id}
+   </update>
+   <delete id="deleteMember">
+      DELETE FROM MYPAGE
+      WHERE MY_ID = #{my_id}
+   </delete>
+   <select id="readMarketUser" resultType="com.oe.domain.MarketUserVO">
+      SELECT *
+      FROM MARKETUSER
+      WHERE US_ID = #{my_id}
+   </select>
+   <select id="readCountHB" resultType="int">
+      SELECT COUNT(*)
+      FROM HEARTBOARD
+      WHERE HE_ID = #{my_id}
+   </select>
+   <update id="updateNick_marketuser">
+      UPDATE MARKETUSER
+      SET US_NICKNAME = #{my_nickname}
+      WHERE US_ID = #{my_id}
+   </update>
+   <update id="updateNick_marketboard">
+      UPDATE MARKETBOARD
+      SET BO_NICKNAME = #{my_nickname}
+      WHERE BO_ID = #{my_id}
+   </update>
+   <update id="updateNick_buyboard">
+      UPDATE BUYBOARD
+      SET BUY_NICKNAME = #{my_nickname}
+      WHERE BUY_ID = #{my_id}
+   </update>
+   <update id="updateNick_heartboard">
+      UPDATE HEARTBOARD
+      SET HE_NICKNAME = #{my_nickname}
+      WHERE HE_ID = #{my_id}
+   </update>
+   <update id="updateNick_center">
+      UPDATE CENTER
+      SET CE_NICKNAME = #{my_nickname}
+      WHERE CE_ID = #{my_id}
+   </update>
+   <update id="updateNick_notice">
+      UPDATE NOTICE
+      SET NO_NICKNAME = #{my_nickname}
+      WHERE NO_ID = #{my_id}
+   </update>
+   <update id="updateNick_sellboard">
+      UPDATE SELLBOARD
+      SET SEL_NICKNAME = #{my_nickname}
+      WHERE SEL_ID = #{my_id}
+   </update>
+   <update id="updateNick_cr_seller">
+      UPDATE CHATROOM
+      SET CR_SELLER = #{my_nickname}
+      WHERE CR_SELLER_ID = #{my_id}
+   </update>
+   <update id="updateNick_cr_buyer">
+      UPDATE CHATROOM
+      SET CR_BUYER = #{my_nickname}
+      WHERE CR_BUYER_ID = #{my_id}
+   </update>
+   <update id="updatePreWithdrawal">
+      UPDATE MYPAGE
+      SET WD_REASON_PRE = #{wd_reason_pre},
+         WD_REMARK_PRE = #{wd_remark_pre, jdbcType=VARCHAR}
+      WHERE MY_ID = #{my_id}
+   </update>
+   <update id="updateProfile_reply">
+      UPDATE REPLY
+      SET RE_PROFILE = #{my_image}
+      WHERE RE_ID = #{my_id}
+   </update>
+   <update id="updateNick_reply">
+      UPDATE REPLY
+      SET RE_NAME = #{my_nickname}
+      WHERE RE_ID = #{my_id}
+   </update>
+   <insert id="insertWithdrawal">
+      INSERT INTO WITHDRAWAL (WD_ID, WD_REASON, WD_REMARK, WD_DATE)
+      VALUES(#{my_id}, #{wd_reason_pre}, #{wd_remark_pre}, SYSDATE)
+   </insert>
+   <select id="nicknameChk" resultType="int">
+      SELECT COUNT(my_nickname)
+      FROM MYPAGE
+      WHERE MY_NICKNAME = #{my_nickname}
+   </select>
+   <select id="count_sell" resultType="int">
+      SELECT COUNT(*)
+      FROM MARKETBOARD
+      WHERE BO_ID = #{my_id}
+   </select>
+   <select id="count_buy" resultType="int">
+      SELECT COUNT(*)
+      FROM BUYBOARD
+      WHERE BUY_ID = #{my_id}
+   </select>
+   <select id="count_chat" resultType="int">
+      SELECT COUNT(*)
+      FROM CHATROOM
+      WHERE CR_SELLER IN (
+         SELECT MY_NICKNAME
+         FROM MYPAGE
+         WHERE MY_ID = #{my_id}
+      ) OR CR_BUYER IN (
+         SELECT MY_NICKNAME
+         FROM MYPAGE
+         WHERE MY_ID = #{my_id}
+      )
+   </select>
+   <update id="updateProfile_marketboard">
+      UPDATE marketboard
+      SET bo_PROFILE = #{my_image}
+      WHERE bo_ID = #{my_id}
+   </update>
+   
+</mapper>
